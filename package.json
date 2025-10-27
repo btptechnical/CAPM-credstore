@@ -4,16 +4,29 @@
   "description": "A simple CAP project.",
   "dependencies": {
     "@cap-js/hana": "^2",
+    "@sap-cloud-sdk/http-client": "^4.1.2",
+    "@sap-cloud-sdk/resilience": "^4.1.2",
     "@sap/cds": "^9",
+    "@sap/xsenv": "^6.0.0",
     "@sap/xssec": "^4",
-    "express": "^4"
+    "express": "^4",
+    "fs": "^0.0.1-security",
+    "node-fetch": "^2.7.0",
+    "node-jose": "^2.2.0"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^2",
-    "@sap/cds-dk": "^9"
+    "@sap/cds-dk": "^9",
+    "cds-plugin-ui5": "^0.13.0",
+    "rimraf": "^5.0.5",
+    "mbt": "^1.2.29"
   },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds-serve",
+    "watch-mydeptui": "cds watch --open mydeptui/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "undeploy": "cf undeploy mydept --delete-services --delete-service-keys --delete-service-brokers",
+    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
   },
   "private": true,
   "cds": {
@@ -26,5 +39,11 @@
     "server": {
       "index": true
     }
-  }
+  },
+  "workspaces": [
+    "app/*"
+  ],
+  "sapux": [
+    "app/mydeptui"
+  ]
 }

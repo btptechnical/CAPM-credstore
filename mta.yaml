@@ -1,52 +1,107 @@
 _schema-version: 3.3.0
 ID: mydept
+description: A simple CAP project.
 version: 1.0.0
-description: "A simple CAP project."
+modules:
+- name: mydept-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: mydept-auth
+  - name: mydept-db
+  - name: INS-Cred-Store
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    instances: 1
+  build-parameters:
+    builder: npm-ci
+- name: mydept-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: mydept-db
+  parameters:
+    buildpack: nodejs_buildpack
+- name: mydept-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: mydept-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - mydeptui.zip
+      name: mydeptui
+      target-path: resources/
+- name: mydeptui
+  type: html5
+  path: app/mydeptui
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: mydept-auth
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      tenant-mode: dedicated
+      xsappname: mydept-${org}-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-plan: application
+- name: mydept-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: INS-Cred-Store
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: credstore
+    service-name: INS-Cred-Store
+    service-plan: trial
+  active: true
+- name: mydept-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: mydept-html5-service
+    service-plan: app-host
+- name: mydept-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: false
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: mydept-destination-service
+    service-plan: lite
 parameters:
+  deploy_mode: html5-repo
   enable-parallel-deployments: true
 build-parameters:
   before-all:
-    - builder: custom
-      commands:
-        - npm ci
-        - npx cds build --production
-modules:
-  - name: mydept-srv
-    type: nodejs
-    path: gen/srv
-    parameters:
-      instances: 1
-      buildpack: nodejs_buildpack
-    build-parameters:
-      builder: npm-ci
-    provides:
-      - name: srv-api # required by consumers of CAP services (e.g. approuter)
-        properties:
-          srv-url: ${default-url}
-    requires:
-      - name: mydept-auth
-      - name: mydept-db
-
-  - name: mydept-db-deployer
-    type: hdb
-    path: gen/db
-    parameters:
-      buildpack: nodejs_buildpack
-    requires:
-      - name: mydept-db
-
-resources:
-  - name: mydept-auth
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: xsuaa
-      service-plan: application
-      path: ./xs-security.json
-      config:
-        xsappname: mydept-${org}-${space}
-        tenant-mode: dedicated
-  - name: mydept-db
-    type: com.sap.xs.hdi-container
-    parameters:
-      service: hana
-      service-plan: hdi-shared
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production
