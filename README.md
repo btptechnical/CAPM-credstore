@@ -26,7 +26,7 @@ Learn more at https://cap.cloud.sap/docs/get-started/.
 
 ## BTP Services
 Service | Plan | Service Key needed | Binding | Service Name (user created)
----------|----------
+--------|------|--------------------|---------|------------------------------
 SAP HANA Cloud | hana | Yes| No | HANA-DB
 Credential Store | trial | Yes | Yes | INS-Cred-Store
 Authorization and Trust Management Service | application | Yes | Yes | mydept-auth
