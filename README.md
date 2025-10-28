@@ -60,9 +60,23 @@ only namespace, name, value filled.
   create .env file which has entry for namespace
   credstoreNamespace=aribabtp
 
+  ## cds install
+  cds add xsuaa - to add xsuaa service module in package/mta file
+  cds add mta " add mta file to project
+  cds bind -2 serviceName:ServiceNameServiceKey " services like cred store and XSUAA needs to be bind
+
   ## npm install
+    npm install
     npm install node-jose -- save
-    npm install node-fetch -- save
+    npm install node-fetch -- save " specific version command-->npm install node-fetch@2.7.0 to uninstall-->npm uninstall node-fetch   
     npm install @sap/xsenv" -- save
   ## Create Cred.js
   create credential handler file to make connection between BTP Cred store and read specific password/credentials maintained in cred store
+
+
+  ## to run app locally
+    cds bind -2 serviceName:ServiceNameServiceKey " services like cred store and XSUAA needs to be bind
+
+  ## deploy
+  mbt build " right after addition of mta file 
+  cf deploy (mtar path)
